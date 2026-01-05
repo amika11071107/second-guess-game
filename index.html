@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秒数当てゲーム</title>
+    <style>
+        /* 全体のベーススタイル */
+        body {
+            font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', sans-serif; /* 読みやすい丸みフォント */
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffeef8, #f0f8ff); /* やさしいパステル背景 */
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        /* ゲームコンテナ */
+        .game-container {
+            background: rgba(255, 255, 255, 0.9); /* 半透明の白 */
+            padding: 30px;
+            border-radius: 25px; /* 大きな角丸 */
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 0 auto;
+            backdrop-filter: blur(10px); /* ぼかし効果 */
+        }
+        
+        /* タイトル */
+        h1 {
+            color: #8b7fb8; /* くすみ紫 */
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        /* 目標時間表示 */
+        .target-time {
+            font-size: 24px;
+            color: #6b8e7a; /* くすみ緑 */
+            margin: 20px 0;
+            background: #f8fffe;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #e8f5f0;
+        }
+        
+        /* 経過時間表示 */
+        .elapsed-time {
+            font-size: 20px;
+            color: #a67c8a; /* くすみピンク */
+            margin: 15px 0;
+            background: #fef8fa;
+            padding: 12px;
+            border-radius: 12px;
+            border: 2px solid #f5e8ed;
+        }
+        
+        /* ボタンコンテナ */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        /* ボタン共通スタイル */
+        button {
+            font-size: 18px;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 20px; /* 角丸ボタン */
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.2s ease; /* アニメーション */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            min-width: 100px; /* スマホ対応：最小幅 */
+            min-height: 50px; /* スマホ対応：最小高さ */
+            flex: 1;
+            max-width: 120px;
+        }
+        
+        /* ボタン押下時の演出 */
+        button:active {
+            transform: translateY(2px); /* 押したときに少し下がる */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* スタートボタン */
+        .start-btn {
+            background: linear-gradient(135deg, #a8e6cf, #88d8a3); /* パステル緑 */
+            color: white;
+        }
+        
+        /* ストップボタン */
+        .stop-btn {
+            background: linear-gradient(135deg, #ffb3ba, #ff9aa2); /* パステル赤 */
+            color: white;
+        }
+        
+        /* リセットボタン */
+        .reset-btn {
+            background: linear-gradient(135deg, #b3d9ff, #87ceeb); /* パステル青 */
+            color: white;
+        }
+        
+        /* 無効化されたボタン */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* 結果表示 */
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 15px;
+            display: none; /* 初期状態では非表示 */
+        }
+        
+        /* 成功時 */
+        .success {
+            background: #e8f5e8;
+            color: #4a7c59;
+            border: 2px solid #a8e6cf;
+        }
+        
+        /* 失敗時 */
+        .error {
+            background: #ffeaea;
+            color: #8b4a4a;
+            border: 2px solid #ffb3ba;
+        }
+        
+        /* 完全一致時の特別演出 */
+        .perfect {
+            background: linear-gradient(135deg, #fff2cc, #ffe066);
+            color: #b8860b;
+            border: 3px solid #ffd700;
+            font-size: 22px;
+            animation: perfectPop 0.6s ease-out;
+        }
+        
+        /* 完全一致時のアニメーション */
+        @keyframes perfectPop {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        /* スマホ対応：画面幅768px以下 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .game-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            button {
+                flex: 1;
+                margin: 5px;
+                padding: 18px;
+                font-size: 16px;
+                max-width: none;
+            }
+            
+            .target-time, .elapsed-time {
+                font-size: 18px;
+                padding: 12px;
+            }
+        }
+        
+        /* スマホ対応：画面幅480px以下 */
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .target-time, .elapsed-time {
+                font-size: 16px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>秒数当てゲーム</h1>
+        <div class="target-time">目標時間: <span id="targetTime">0</span>秒</div>
+        <div class="elapsed-time" id="elapsedTimeContainer" style="display: none;">経過時間: <span id="elapsedTime">0.0</span>秒</div>
+        
+        <div class="button-container">
+            <button id="startBtn" class="start-btn">スタート</button>
+            <button id="stopBtn" class="stop-btn" disabled>ストップ</button>
+            <button id="resetBtn" class="reset-btn">リセット</button>
+        </div>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        let targetTime = 0;
+        let startTime = 0;
+        let isRunning = false;
+        let timer = null;
+
+        const targetTimeEl = document.getElementById('targetTime');
+        const elapsedTimeEl = document.getElementById('elapsedTime');
+        const elapsedTimeContainer = document.getElementById('elapsedTimeContainer');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultEl = document.getElementById('result');
+
+        function generateRandomTime() {
+            targetTime = Math.floor(Math.random() * 10) + 1; // 1-10秒
+            targetTimeEl.textContent = targetTime;
+        }
+
+        function updateElapsedTime() {
+            const elapsed = (Date.now() - startTime) / 1000;
+            elapsedTimeEl.textContent = elapsed.toFixed(1);
+        }
+
+        function startGame() {
+            if (!isRunning) {
+                startTime = Date.now();
+                isRunning = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                resetBtn.disabled = true; // スタート中はリセットも無効化
+                resultEl.textContent = '';
+                
+                timer = setInterval(updateElapsedTime, 100);
+            }
+        }
+
+        function stopGame() {
+            if (isRunning) {
+                clearInterval(timer);
+                isRunning = false;
+                startBtn.disabled = true; // ストップ後はスタートも無効化
+                stopBtn.disabled = true;
+                resetBtn.disabled = false;
+                
+                const finalTime = (Date.now() - startTime) / 1000;
+                elapsedTimeEl.textContent = finalTime.toFixed(1);
+                elapsedTimeContainer.style.display = 'block';
+                
+                const difference = Math.abs(finalTime - targetTime);
+                
+                if (difference < 0.1) {
+                    resultEl.textContent = `🎉 おめでとう！ピッタリ！ 🎉`;
+                    resultEl.className = 'result perfect';
+                } else if (difference <= 0.5) {
+                    resultEl.textContent = `素晴らしい！ 誤差: ${difference.toFixed(1)}秒`;
+                    resultEl.className = 'result success';
+                } else {
+                    resultEl.textContent = `惜しい！ 誤差: ${difference.toFixed(1)}秒`;
+                    resultEl.className = 'result error';
+                }
+                resultEl.style.display = 'block'; // メッセージを表示
+            }
+        }
+
+        function resetGame() {
+            clearInterval(timer);
+            isRunning = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            resetBtn.disabled = false;
+            elapsedTimeContainer.style.display = 'none';
+            resultEl.style.display = 'none'; // メッセージを非表示
+            generateRandomTime();
+        }
+
+        startBtn.addEventListener('click', startGame);
+        stopBtn.addEventListener('click', stopGame);
+        resetBtn.addEventListener('click', resetGame);
+
+        // 初期化
+        generateRandomTime();
+    </script>
+</body>
+</html>
