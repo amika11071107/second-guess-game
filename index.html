@@ -251,8 +251,10 @@
                 isRunning = true;
                 startBtn.disabled = true;
                 stopBtn.disabled = false;
-                resetBtn.disabled = true; // スタート中はリセットも無効化
-                resultEl.textContent = '';
+                resetBtn.disabled = true;
+                resultEl.textContent = '🤔';
+                resultEl.className = 'result';
+                resultEl.style.display = 'block'; // 悩んでいる顔を表示
                 
                 timer = setInterval(updateElapsedTime, 100);
             }
@@ -276,10 +278,10 @@
                     resultEl.textContent = `🎉 おめでとう！ピッタリ！ 🎉`;
                     resultEl.className = 'result perfect';
                 } else if (difference <= 0.5) {
-                    resultEl.textContent = `素晴らしい！ 誤差: ${difference.toFixed(1)}秒`;
+                    resultEl.textContent = `😊 素晴らしい！ 誤差: ${difference.toFixed(1)}秒`;
                     resultEl.className = 'result success';
                 } else {
-                    resultEl.textContent = `惜しい！ 誤差: ${difference.toFixed(1)}秒`;
+                    resultEl.textContent = `😅 惜しい！ 誤差: ${difference.toFixed(1)}秒`;
                     resultEl.className = 'result error';
                 }
                 resultEl.style.display = 'block'; // メッセージを表示
